@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { HeaderAuthButton } from "@/features/marketing/components/header-auth-button"
 import { REPO_URL } from "@/lib/deployment"
 import { Button } from "@/components/ui/button"
 
@@ -25,9 +26,12 @@ export function MarketingHeader() {
               GitHub
             </a>
           </Button>
-          <Button asChild size="sm">
-            <Link href="/sign-in">Sign in</Link>
-          </Button>
+          {/*
+            A signed-in visitor reaching the landing page — bookmark, logo
+            click, or a stale tab — has no gate to move them along, so the
+            header has to offer the way in.
+          */}
+          <HeaderAuthButton />
         </nav>
       </div>
     </header>
