@@ -1,0 +1,101 @@
+# Self-hosting stack.
+#
+#   docker compose up -d --build
+#
+# Start it once and leave it. Every long-lived service restarts on crash and on
+# machine reboot; migrations re-apply themselves on every start, so pulling new
+# code and rebuilding is the whole upgrade procedure.
+#
+# Workflow runs need one more thing: the Trigger.dev task code has to be
+# deployed to a Trigger.dev instance. That is a one-off, not a service — see the
+# `trigger-deploy` profile at the bottom and content/docs/trigger-dev.md.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot. Runs to completion before `app` starts, on every `up`, so an
+  # upgrade applies its migrations without anyone remembering to. Never
+  # restarted: a migration that fails must stop the deployment, not loop.
+  migrate:
+    build:
+      context: .
+      target: tools
+    command: ["npx", "drizzle-kit", "migrate"]
+    restart: "no"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app
+      # drizzle.config.ts reads this one, not DATABASE_URL, because Neon needs a
+      # direct connection for migrations. Plain Postgres draws no distinction,
+      # so it is the same URL — but it must be set, or the config falls back to
+      # loading .env.local, which does not exist in a container.
+      DATABASE_URL_UNPOOLED: postgres://app:app@postgres:5432/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      target: runner
+      args:
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY: ${NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+        NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+        NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /workflows
+        NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: /workflows
+    # Survives crashes and machine reboots, but stays down if you stop it by
+    # hand. That is the difference between `unless-stopped` and `always`.
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://app:app@postgres:5432/app
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Not part of `up`. Run it explicitly after the first start, and again after
+  # changing anything under features/workflows/:
+  #
+  #   docker compose run --rm trigger-deploy
+  #
+  # Requires TRIGGER_ACCESS_TOKEN in .env (a personal access token, not the
+  # secret key). Works against Trigger.dev Cloud, which builds remotely. A
+  # self-hosted Trigger.dev instance builds locally and needs Docker plus a
+  # registry login, so deploy to one of those from your own machine instead.
+  trigger-deploy:
+    profiles: ["tools"]
+    build:
+      context: .
+      target: tools
+    command: ["npx", "trigger.dev@latest", "deploy"]
+    restart: "no"
+    env_file: .env
+
+volumes:
+  postgres-data:

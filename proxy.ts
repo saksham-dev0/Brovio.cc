@@ -1,6 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
 
-const isProtectedRoute = createRouteMatcher(["/", "/billing(.*)", "/workflows(.*)"])
+// `/` and `/docs` are the public marketing surface, so they are absent here.
+const isProtectedRoute = createRouteMatcher([
+  "/workflows(.*)",
+  "/billing(.*)",
+  "/upgrade(.*)",
+])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {

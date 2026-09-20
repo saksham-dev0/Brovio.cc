@@ -34,10 +34,12 @@ sign up for. The README states this honestly rather than implying the stack is
 dependency-free.
 
 Postgres is the exception: the compose stack runs it locally, so no Neon
-account is needed. Trigger.dev is also genuinely self-hostable, but this design
-ships only the worker; pointing it at a self-hosted Trigger.dev instance instead
-of Trigger.dev cloud is the self-hoster's choice and is documented, not
-packaged.
+account is needed.
+
+Trigger.dev is a third case. It is genuinely self-hostable, but it cannot be
+reduced to an environment variable, because task code is *deployed* to a
+Trigger.dev instance rather than run as an ordinary container. Section
+"Trigger.dev setup" below states what the operator must do by hand.
 
 ## Architecture
 
@@ -119,6 +121,7 @@ Markdown files in the repository, rendered by
 time. Initial pages:
 
 - Self-hosting quickstart
+- Trigger.dev setup (required manual steps; see below)
 - Environment variable reference
 - Node reference
 - Architecture overview
@@ -151,16 +154,66 @@ shape.
 - `next.config.ts` sets `output: "standalone"`.
 - `Dockerfile` builds the standalone Next.js output.
 - `docker-compose.yml` defines four services: `postgres`, a `migrate` init
-  container running `drizzle-kit migrate`, `app`, and `worker`. The `worker`
-  service runs the Trigger.dev worker against whichever Trigger.dev instance the
-  operator configures; the Trigger.dev platform itself is not part of the
-  compose stack.
+  container running `drizzle-kit migrate`, and `app`. There is no worker
+  service; see "Trigger.dev setup".
 - `.env.example` lists every variable with its purpose, a signup link for the
   service it belongs to, and whether it is required.
 
 A self-hoster supplies credentials for Clerk, Liveblocks, Browserbase,
 Trigger.dev, and an LLM provider. Postgres runs in the compose stack. Dodo
 credentials are not required.
+
+## Trigger.dev setup
+
+Workflow runs execute as a Trigger.dev task (`features/workflows/tasks/run-workflow.ts`).
+Nothing in the application runs workflows on its own, so a self-hosted
+deployment is not functional until Trigger.dev is configured. This cannot be
+automated away by `docker compose up`, and the documentation must say so
+plainly rather than listing Trigger.dev as one more API key.
+
+### The project reference is edited by hand
+
+`trigger.config.ts` hardcodes this project's own reference in its `project`
+field, and stays that way by decision. It is not read from the environment.
+
+A self-hoster must therefore open `trigger.config.ts` and replace that value
+with their own project reference before deploying. Leaving it unchanged means
+their deploy targets a project they do not own and fails.
+
+This makes the file the one piece of source a self-hoster edits rather than
+configures, so the quickstart calls it out as its own numbered step with the
+exact line to change, and the environment variable reference notes that the
+project reference lives in source, not in `.env`.
+
+### Steps the operator must perform by hand
+
+Documented as a required, numbered section of the self-hosting quickstart, not
+a footnote:
+
+1. Create a Trigger.dev account on Trigger.dev Cloud, *or* stand up a
+   self-hosted Trigger.dev instance by following its own Docker guide.
+2. Create a project and paste its reference into the `project` field of
+   `trigger.config.ts`, replacing the value that ships in the repository.
+3. Copy a secret key for the target environment into `TRIGGER_SECRET_KEY`.
+4. When using a self-hosted Trigger.dev instance, set `TRIGGER_API_URL` to that
+   instance's URL for both the application and the CLI.
+5. Deploy the task code with `npx trigger.dev@latest deploy`, or run
+   `npx trigger.dev@latest dev` while developing. Without this step the tasks
+   are not registered and every workflow run fails.
+6. Re-run the deploy after changing anything under `features/workflows/`.
+
+### Failing loudly
+
+A deployment missing `TRIGGER_SECRET_KEY` or `TRIGGER_PROJECT_REF` must not
+present a working-looking canvas whose Run button fails at the last moment. The
+run entry point checks for the configuration and surfaces a clear message
+pointing at the Trigger.dev setup documentation.
+
+### Not packaged
+
+Self-hosting the Trigger.dev platform requires a Docker registry, its own
+compose stack, and `TRIGGER_API_URL` wiring. That is Trigger.dev's project to
+document, and this repository links to their guide rather than reproducing it.
 
 ## Publishing gate
 
@@ -186,6 +239,11 @@ repository public are manual steps taken by the maintainer.
   `toEntitlement()` behavior applies and the user sees the paywall.
 - Documentation slug that matches no Markdown file: renders the route's
   `not-found`.
+- `TRIGGER_SECRET_KEY` missing: triggering a run fails with a message naming
+  the Trigger.dev setup documentation, rather than a generic error. An
+  unedited project reference in `trigger.config.ts` cannot be detected at
+  runtime, so the quickstart carries the burden of making that step
+  unmissable.
 
 ## Testing
 
@@ -200,6 +258,8 @@ Manual matrix, each verified before publishing:
 | Cloud, signed in, active subscription | Full application |
 | Self-hosted | No paywall, billing navigation hidden, no Dodo requests |
 | Clean clone, `.env` filled, `docker compose up` | Reaches a working canvas |
+| Clean clone, `TRIGGER_SECRET_KEY` unset, Run pressed | Clear message pointing at the Trigger.dev setup docs |
+| Clean clone, Trigger.dev configured and task deployed | Workflow run completes |
 | `/` and `/docs` signed out | Render without redirecting to sign-in |
 
 ## Implementation order
@@ -208,7 +268,7 @@ Manual matrix, each verified before publishing:
 2. Routing restructure, deployment mode flag, entitlement short-circuit.
 3. Paywall page and plan changes.
 4. Landing page.
-5. Documentation routes and initial content.
+5. Documentation routes and initial content, including the Trigger.dev setup page.
 6. Docker, compose, database driver split.
 7. README, LICENSE, CONTRIBUTING; then publish.
 
@@ -220,3 +280,7 @@ Manual matrix, each verified before publishing:
   operator's own API key, so session replay works identically in both
   deployments.
 - Any license key or entitlement mechanism for self-hosted deployments.
+- Packaging a self-hosted Trigger.dev platform in our compose stack. Operators
+  who want one follow Trigger.dev's own self-hosting guide.
+- Moving the Trigger.dev project reference out of `trigger.config.ts`. The file
+  is left exactly as it is; self-hosters edit it.

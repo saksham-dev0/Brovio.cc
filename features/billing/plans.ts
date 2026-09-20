@@ -32,15 +32,15 @@ export const plans = {
   free: {
     id: "free",
     name: "Free",
-    description: "Build and run workflows while you explore.",
+    description:
+      "Not subscribed. Subscribe to use the hosted app, or self-host it for free.",
     price: "$0",
     interval: "forever",
     features: [
-      "Up to 2 workflows",
-      "Manual workflow runs",
-      "Run history and session replays",
+      "No workflows on the hosted app",
+      "Unlimited everything when you self-host",
     ],
-    limits: { workflows: 2 },
+    limits: { workflows: 0 },
     productId: null,
   },
   pro: {

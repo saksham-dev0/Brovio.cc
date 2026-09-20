@@ -5,7 +5,8 @@ import { BillingNav } from "@/features/billing/components/billing-nav"
 import { createWorkflowAction } from "@/features/workflows/actions"
 import { WorkflowNav } from "@/features/workflows/components/workflow-nav"
 import { listWorkflows } from "@/features/workflows/data"
-import { getWorkflowLimit } from "@/features/workflows/lib/workflow-limit"
+import { isSelfHosted } from "@/lib/deployment"
+import { getWorkflowLimit } from "@/features/workflows/lib/get-workflow-limit"
 import {
   Sidebar,
   SidebarContent,
@@ -28,9 +29,9 @@ export async function AppSidebar({
         <div className="min-w-0 group-data-[collapsible=icon]:hidden">
           <OrganizationSwitcher
             hidePersonal
-            afterCreateOrganizationUrl="/"
-            afterSelectOrganizationUrl="/"
-            afterLeaveOrganizationUrl="/"
+            afterCreateOrganizationUrl="/workflows"
+            afterSelectOrganizationUrl="/workflows"
+            afterLeaveOrganizationUrl="/workflows"
             appearance={{
               elements: {
                 rootBox: "min-w-0 group-data-[collapsible=icon]:!hidden",
@@ -51,7 +52,8 @@ export async function AppSidebar({
         ) : null}
       </SidebarContent>
       <SidebarFooter className="gap-2 p-2 group-data-[collapsible=icon]:items-center">
-        <BillingNav />
+        {/* A self-hosted installation has no subscription to manage. */}
+        {isSelfHosted ? null : <BillingNav />}
         <UserButton showName={false} />
       </SidebarFooter>
     </Sidebar>
