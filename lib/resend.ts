@@ -8,7 +8,7 @@ export const resend = new Resend(process.env.RESEND_API_KEY!)
  * Resend account owner's address — set RESEND_FROM once a domain is verified.
  */
 export const DEFAULT_FROM =
-  process.env.RESEND_FROM ?? "Acme <onboarding@resend.dev>"
+  process.env.RESEND_FROM ?? "Brovio <noreply@relayys.com>"
 
 type SendEmailParams = {
   to: string | string[]
