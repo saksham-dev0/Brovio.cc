@@ -37,3 +37,6 @@ pnpm-debug.log*
 next-env.d.ts
 
 .trigger
+
+# demo videos (too large for GitHub; hosted on a CDN)
+public/videos/*.mp4

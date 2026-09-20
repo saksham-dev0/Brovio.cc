@@ -33,6 +33,24 @@ export function HowItWorksSection() {
             </li>
           ))}
         </ol>
+        {/*
+          The demo file is not in the repository — at ~196 MB it is over
+          GitHub's 100 MB limit, so public/videos/*.mp4 is gitignored. Until it
+          is uploaded to a CDN and this src points at that URL, the poster
+          renders but playback 404s on a fresh clone or deploy.
+        */}
+        <div className="mt-16 overflow-hidden rounded-xl border bg-background shadow-sm">
+          <video
+            className="aspect-video w-full"
+            src="/videos/brovio.mp4"
+            poster="/videos/brovio-poster.png"
+            controls
+            playsInline
+            muted
+            loop
+            preload="metadata"
+          />
+        </div>
       </div>
     </section>
   )
