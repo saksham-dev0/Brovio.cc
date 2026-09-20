@@ -1,2 +1,14 @@
 .claude/
 .agents/
+.git/
+.next/
+node_modules/
+.env
+.env.*
+.trigger/
+.neon/
+.vscode/
+.mcp.json
+docs/
+Dockerfile
+docker-compose.yml

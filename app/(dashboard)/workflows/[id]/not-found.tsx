@@ -25,7 +25,7 @@ export default function NotFound() {
       </EmptyHeader>
       <EmptyContent>
         <Button asChild>
-          <Link href="/">Back to dashboard</Link>
+          <Link href="/workflows">Back to dashboard</Link>
         </Button>
       </EmptyContent>
     </Empty>

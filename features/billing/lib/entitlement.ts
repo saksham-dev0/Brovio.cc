@@ -1,5 +1,6 @@
 import { getSubscription } from "@/features/billing/data"
 import { getPlan, plans, type Plan } from "@/features/billing/plans"
+import { isSelfHosted } from "@/lib/deployment"
 import type { Subscription } from "@/lib/db/schema"
 
 /**
@@ -29,6 +30,20 @@ const FREE_ENTITLEMENT: Entitlement = {
   needsAttention: false,
 }
 
+/**
+ * Self-hosted installations are not billed and have no subscription rows, so
+ * they resolve to full access without touching the database or the payment
+ * provider.
+ */
+const SELF_HOSTED_ENTITLEMENT: Entitlement = {
+  plan: plans.pro,
+  isPro: true,
+  status: null,
+  currentPeriodEnd: null,
+  cancelAtPeriodEnd: false,
+  needsAttention: false,
+}
+
 export function toEntitlement(subscription?: Subscription): Entitlement {
   if (!subscription) return FREE_ENTITLEMENT
 
@@ -50,5 +65,7 @@ export function toEntitlement(subscription?: Subscription): Entitlement {
  * gates should call this rather than reading the subscription row directly.
  */
 export async function getEntitlement(orgId: string): Promise<Entitlement> {
+  if (isSelfHosted) return SELF_HOSTED_ENTITLEMENT
+
   return toEntitlement(await getSubscription(orgId))
 }

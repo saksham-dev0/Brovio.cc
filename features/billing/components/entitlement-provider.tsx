@@ -50,7 +50,7 @@ export function useProGate() {
     if (entitlement.isPro) return true
 
     toast.error(`${feature} is a Pro feature.`, {
-      action: { label: "Upgrade", onClick: () => router.push("/billing") },
+      action: { label: "Upgrade", onClick: () => router.push("/upgrade") },
     })
 
     return false

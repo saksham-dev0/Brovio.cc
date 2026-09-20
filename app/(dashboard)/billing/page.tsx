@@ -4,7 +4,7 @@ import { PlanCard } from "@/features/billing/components/plan-card"
 import { SubscriptionSummary } from "@/features/billing/components/subscription-summary"
 import { getEntitlement } from "@/features/billing/lib/entitlement"
 import { paidPlans } from "@/features/billing/plans"
-import { getWorkflowLimit } from "@/features/workflows/lib/workflow-limit"
+import { getWorkflowLimit } from "@/features/workflows/lib/get-workflow-limit"
 import { Separator } from "@/components/ui/separator"
 
 export default async function BillingPage() {
