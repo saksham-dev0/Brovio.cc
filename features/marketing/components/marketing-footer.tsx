@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 import { REPO_URL } from "@/lib/deployment"
@@ -6,7 +7,19 @@ export function MarketingFooter() {
   return (
     <footer className="border-t">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p>Open source under AGPL-3.0.</p>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/Logo.png"
+            alt=""
+            width={500}
+            height={500}
+            className="size-5 rounded"
+          />
+          <p>
+            <span className="font-medium text-foreground">Brovio.cc</span> — open
+            source under AGPL-3.0.
+          </p>
+        </div>
         <nav className="flex flex-wrap gap-4">
           <Link href="/docs" className="hover:text-foreground">
             Documentation

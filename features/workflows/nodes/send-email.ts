@@ -1,8 +1,4 @@
-import { resend } from "@/lib/resend"
-
-// The sandbox sender, which only delivers to the Resend account owner's own
-// address. Swap it for a verified domain before this reaches real recipients.
-const FROM = "onboarding@resend.dev"
+import { DEFAULT_FROM, resend } from "@/lib/resend"
 
 export async function sendEmail({
   to,
@@ -16,7 +12,7 @@ export async function sendEmail({
   // The SDK returns API failures on `error` rather than throwing, so a send
   // that never left Resend would otherwise mark this step done.
   const { data, error } = await resend.emails.send({
-    from: FROM,
+    from: DEFAULT_FROM,
     to: [to],
     subject,
     text: body,

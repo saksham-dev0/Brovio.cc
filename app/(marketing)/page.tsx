@@ -7,7 +7,7 @@ import { HowItWorksSection } from "@/features/marketing/components/how-it-works-
 import { PricingSection } from "@/features/marketing/components/pricing-section"
 
 export const metadata: Metadata = {
-  title: "Browser Automation — build automations on a canvas",
+  title: "Brovio.cc — build automations on a canvas",
   description:
     "Build automations on a canvas and run them in the cloud, or self-host the whole thing for free.",
 }

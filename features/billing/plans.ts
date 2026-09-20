@@ -47,7 +47,7 @@ export const plans = {
     id: "pro",
     name: "Pro",
     description: "For teams running browser automations in production.",
-    price: "$29",
+    price: "$49",
     interval: "per month",
     features: [
       "Everything in Free",

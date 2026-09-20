@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 
 import { HeaderAuthButton } from "@/features/marketing/components/header-auth-button"
@@ -8,8 +9,19 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-6">
-        <Link href="/" className="text-sm font-semibold tracking-tight">
-          Browser Automation
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm font-semibold tracking-tight"
+        >
+          <Image
+            src="/Logo.png"
+            alt=""
+            width={500}
+            height={500}
+            priority
+            className="size-7 rounded-md"
+          />
+          Brovio.cc
         </Link>
         <nav className="flex items-center gap-1">
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">

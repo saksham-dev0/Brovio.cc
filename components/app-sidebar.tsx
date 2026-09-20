@@ -26,7 +26,7 @@ export async function AppSidebar({
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader className="h-12 flex-row items-center justify-between gap-2 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-        <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+        <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
           <OrganizationSwitcher
             hidePersonal
             afterCreateOrganizationUrl="/workflows"
@@ -34,13 +34,17 @@ export async function AppSidebar({
             afterLeaveOrganizationUrl="/workflows"
             appearance={{
               elements: {
-                rootBox: "min-w-0 group-data-[collapsible=icon]:!hidden",
-                organizationSwitcherTrigger: "w-full justify-between"
+                rootBox: "min-w-0 w-full group-data-[collapsible=icon]:!hidden",
+                organizationSwitcherTrigger:
+                  "w-full min-w-0 justify-start gap-1.5 px-1.5",
+                organizationPreview: "min-w-0 flex-1",
+                organizationPreviewTextContainer: "min-w-0",
+                organizationPreviewMainIdentifier: "truncate"
               }
             }}
           />
         </div>
-        <SidebarTrigger />
+        <SidebarTrigger className="shrink-0" />
       </SidebarHeader>
       <SidebarContent>
         {workflowLimit ? (
