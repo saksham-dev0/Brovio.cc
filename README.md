@@ -16,33 +16,32 @@ limits, no subscription. See the [self-hosting guide](content/docs/self-hosting.
 
 ## Quickstart (self-hosting)
 
-```bash
-cp .env.example .env
-# fill in .env — see content/docs/environment-variables.md
-# and set your Trigger.dev project ref in trigger.config.ts
+You need Docker, and free accounts with Clerk, Liveblocks, Browserbase, and
+Trigger.dev. Postgres is included — no database provider needed.
 
-docker compose up -d --build        # start it, detached
-docker compose run --rm trigger-deploy   # deploy the workflow tasks, once
+```bash
+git clone <repository-url>
+cd browser-automation
+./scripts/setup.sh
 ```
 
-Then open <http://localhost:3000>.
+The script tells you what is missing, creates your `.env`, builds and starts
+everything, makes it survive reboots, and deploys the workflow tasks. Run it
+again any time — after pulling new code, or just to check on things.
 
-That is the whole setup. The stack is declared `restart: unless-stopped`, so it
-survives crashes and machine reboots on its own — nothing to re-run.
+Full walkthrough from a bare machine, including installing Docker and where each
+key comes from: **[self-hosting guide](content/docs/self-hosting.md)**.
 
-> **Workflow runs do not work until the Trigger.dev tasks are deployed.** That
-> also means editing `trigger.config.ts` with your own project reference. See
-> [Trigger.dev setup](content/docs/trigger-dev.md) — it is not only environment
-> variables.
+> One step is not just an environment variable: Trigger.dev needs your own
+> project reference in `trigger.config.ts`. Workflow runs fail without it.
+> See [Trigger.dev setup](content/docs/trigger-dev.md).
 
-Upgrading later:
+Upgrading:
 
 ```bash
 git pull
-docker compose up -d --build
+./scripts/setup.sh
 ```
-
-Migrations re-apply themselves on every start.
 
 ## Services you need accounts for
 
